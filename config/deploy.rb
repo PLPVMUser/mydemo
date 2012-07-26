@@ -17,6 +17,9 @@ role :web, "localhost"                          # Your HTTP server, Apache/etc
 role :app, "localhost"                          # This may be the same as your `Web` server
 role :db,  "localhost", :primary => true 	# This is where Rails migrations will run
 
+default_run_options[:pty] = true
+ssh_options[:forward_agent] = true
+
 # if you want to clean up old releases on each deploy uncomment this:
 # after "deploy:restart", "deploy:cleanup"
 
