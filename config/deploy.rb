@@ -6,10 +6,9 @@ set :use_sudo, false
 
 set :application, "mydemo"
 set :deploy_to, "/var/www/#{application}"
-set :deploy_via, :copy
 
-set :repository,  "."
-set :local_repository, "file:///home/www-data/RubyProjects/mydemo/.git"
+set :repository, "git@github.com:eraserx99/mydemo.git"
+set :branch, "master"
 
 set :scm, :git
 # Or: `accurev`, `bzr`, `cvs`, `darcs`, `git`, `mercurial`, `perforce`, `subversion` or `none`
