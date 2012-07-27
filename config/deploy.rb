@@ -1,6 +1,6 @@
 require "bundler/capistrano"
 require 'rvm/capistrano'
-set :rvm_ruby_string, 'ruby-1.9.3-p194@demo'
+set :rvm_ruby_string, 'ruby-1.9.3-p194@working'
 set :rvm_type, :system 
 
 set :use_sudo, false
