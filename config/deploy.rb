@@ -28,6 +28,18 @@ set :deployer, "login"
 set :application, "mydemo"
 # An application directory based on the name of the RoR application will be created under /var/www directory of the app server.
 set :deploy_to, "/var/www/#{application}"
+# The Rails application environmenti. It could be "development", "production", or "test".
+set :rails_env, "development"
+
+# Skip the gems of the test group for development deployment
+if fetch(:rails_env) == "development"
+	 set :bundle_without, [:test]
+end
+
+# Skip the gems of the development group for test deployment
+if fetch(:rails_env) == "test"
+	 set :bundle_without, [:development]
+end
 
 # The Git repository of the source code and other artificats of the RoR applications.
 set :repository, "git@github.com:eraserx99/mydemo.git"
@@ -95,6 +107,7 @@ namespace :nginx do
 		run "sudo sh -c \"sed -i -e's|%listen%|#{listen}|g' #{sites_available}/#{application}.conf\""
 		run "sudo sh -c \"sed -i -e's|%server_name%|#{server_name}|g' #{sites_available}/#{application}.conf\""
 		run "sudo sh -c \"sed -i -e's|%root%|#{root}|g' #{sites_available}/#{application}.conf\""
+		run "sudo sh -c \"sed -i -e's|%rails_env%|#{rails_env}|g' #{sites_available}/#{application}.conf\""
 		set :user, "#{old_user}"
 		close_sessions
 	end
