@@ -1,8 +1,9 @@
-########################################################################
+#######################################################################
 # Please change the following variables to fit the requirements of 
 # RoR application, if needed.
 #
 # :application
+# :rails_env
 # :repository
 # :branch
 # :listen
@@ -14,7 +15,7 @@
 ########################################################################
 
 require "bundler/capistrano" 
-require 'rvm/capistrano'
+require "rvm/capistrano"
 
 # ruby-1.9.3-p194@working is a working repository when deploying the RoR applications
 set :rvm_ruby_string, 'ruby-1.9.3-p194@working'
@@ -90,7 +91,10 @@ namespace :deploy do
 	task :start do ; end
 	task :stop do ; end
 	task :restart, :roles => :app, :except => { :no_release => true } do
-		nginx.reload_application
+		# nginx.reload_application might not work under some scenarios. 
+		# nginx.restart is used instead.
+		# nginx.reload_application
+		nginx.restart
 	end
 end
 
@@ -143,6 +147,42 @@ namespace :nginx do
 	desc "Request to reload the application"
 	task :reload_application, :roles => :app, :except => { :no_release => true } do
 		run "touch #{File.join(current_path,'tmp','restart.txt')}"
+	end
+
+	desc "Remove a virtual host"
+	task :remove_virtual_host, :roles => :app, :except => { :no_release => true } do
+		set :old_user, "#{user}" 
+		set :user, "#{deployer}" 
+		run "/usr/bin/sudo /usr/sbin/service nginx stop"
+		run "/usr/bin/sudo rm -f #{sites_enabled}/#{application}.conf"
+		run "/usr/bin/sudo rm -f #{sites_available}/#{application}.conf"
+		run "/usr/bin/sudo /usr/sbin/service nginx start"
+		set :user, "#{old_user}"
+		close_sessions
+	end
+
+	desc "Disable a virtual host"
+	task :disable_virtual_host, :roles => :app, :except => { :no_release => true } do
+		set :old_user, "#{user}" 
+		set :user, "#{deployer}" 
+		run "/usr/bin/sudo /usr/sbin/service nginx stop"
+		run "/usr/bin/sudo rm -f #{sites_enabled}/#{application}.conf"
+		run "/usr/bin/sudo /usr/sbin/service nginx start"
+		set :user, "#{old_user}"
+		close_sessions
+	end
+
+	desc "Remove the application"
+	task :remove_application, :roles => :app, :except => { :no_release => true } do
+		set :old_user, "#{user}" 
+		set :user, "#{deployer}" 
+		run "/usr/bin/sudo /usr/sbin/service nginx stop"
+		run "/usr/bin/sudo rm -f #{sites_enabled}/#{application}.conf"
+		run "/usr/bin/sudo rm -f #{sites_available}/#{application}.conf"
+		run "/usr/bin/sudo rm -rf #{deploy_to}"
+		run "/usr/bin/sudo /usr/sbin/service nginx start"
+		set :user, "#{old_user}"
+		close_sessions
 	end
 end
 
